@@ -1,5 +1,0 @@
-/Users/at/LearnOpenGL/build/CMakeFiles/glad.dir
-/Users/at/LearnOpenGL/build/CMakeFiles/stb_image.dir
-/Users/at/LearnOpenGL/build/CMakeFiles/OpenGLBinaryStyle.dir
-/Users/at/LearnOpenGL/build/CMakeFiles/edit_cache.dir
-/Users/at/LearnOpenGL/build/CMakeFiles/rebuild_cache.dir
