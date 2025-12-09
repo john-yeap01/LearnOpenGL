@@ -92,7 +92,7 @@ int main()
 
 
 	// Generates Shader object using shaders default.vert and default.frag
-	Shader shaderProgram("/Users/at/LearnOpenGL/default.vert", "/Users/at/LearnOpenGL/default.frag");
+	Shader shaderProgram("/Users/at/LearnOpenGL/resources/shaders/default.vert", "/Users/at/LearnOpenGL/resources/shaders/default.frag");
 
 
 
@@ -119,7 +119,7 @@ int main()
 	//TEXTURE
 	int widthImg, heightImg, numColCh;
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* bytes = stbi_load("assets/brick.png", &widthImg, &heightImg, &numColCh, 0);
+	unsigned char* bytes = stbi_load("/Users/at/LearnOpenGL/resources/assets/brick.png", &widthImg, &heightImg, &numColCh, 0);
 	GLuint texture;
 	glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);

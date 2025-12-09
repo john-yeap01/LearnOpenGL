@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Add include paths
 include_directories(
-    ${CMAKE_SOURCE_DIR} 
+    ${CMAKE_SOURCE_DIR}/include 
     lib/glad/include
     lib/glfw/include
     lib/stb/include
@@ -25,16 +25,16 @@ target_include_directories(stb_image PUBLIC
     lib/stb/include
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/assets
+file(COPY ${CMAKE_SOURCE_DIR}/resources/assets
      DESTINATION ${CMAKE_BINARY_DIR})
 
 # Create main app
 add_executable(OpenGLBinaryStyle 
-    main.cpp
-    shaderClass.cpp
-    VBO.cpp
-    VAO.cpp
-    EBO.cpp
+    src/main.cpp
+    src/shaderClass.cpp
+    src/VBO.cpp
+    src/VAO.cpp
+    src/EBO.cpp
 )
 
 # Link all required libs
