@@ -9,6 +9,7 @@ include_directories(
     lib/glad/include
     lib/glfw/include
     lib/stb/include
+    lib
 )
 
 # Add GLAD source
@@ -35,6 +36,7 @@ add_executable(OpenGLBinaryStyle
     src/VBO.cpp
     src/VAO.cpp
     src/EBO.cpp
+    src/Texture.cpp
 )
 
 # Link all required libs
