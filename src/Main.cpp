@@ -11,6 +11,10 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+const unsigned int width = 800;
+const unsigned int height = 800;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -29,12 +33,22 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 // };
 
 // square 
+// GLfloat vertices[] = {
+//     // positions          // colors           // texture coords
+//      0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+//      0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+//     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+//     -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+// };
+
 GLfloat vertices[] = {
-    // positions          // colors           // texture coords
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+    // positions            // colors         // tex coords
+     0.5f,  0.0f,  0.5f,     1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // base front-right
+     0.5f,  0.0f, -0.5f,     0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // base back-right
+    -0.5f,  0.0f, -0.5f,     0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // base back-left
+    -0.5f,  0.0f,  0.5f,     1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // base front-left
+
+     0.0f,  0.8f,  0.0f,     1.0f, 0.0f, 1.0f,  0.5f, 0.5f  // apex (top)
 };
 
 // Indices for vertices order
@@ -47,12 +61,22 @@ GLfloat vertices[] = {
 // };
 
 //square
+// GLuint indices[] = {
+//     0, 1, 2,   // first triangle (lower-left, lower-right, upper-right)
+//     2, 3, 0    // second triangle (upper-right, upper-left, lower-left)
+// };
+
 GLuint indices[] = {
-    0, 1, 2,   // first triangle (lower-left, lower-right, upper-right)
-    2, 3, 0    // second triangle (upper-right, upper-left, lower-left)
+    // base (two triangles)
+    0, 1, 2,
+    2, 3, 0,
+
+    // sides (4 triangles)
+    0, 1, 4,
+    1, 2, 4,
+    2, 3, 4,
+    3, 0, 4
 };
-
-
 
 
 int main()
@@ -69,7 +93,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	GLFWwindow* window = glfwCreateWindow(800, 800, "YoutubeOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
 	// Error check if the window fails to create
 	if (window == NULL)
 	{
@@ -125,6 +149,10 @@ int main()
 	texture.Bind();
 	texture.texUnit (shaderProgram, "tex0", 0);
 
+	float rotation = 0.0f;
+	double prevTime = glfwGetTime();
+
+	glEnable(GL_DEPTH_TEST);
 	
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -132,9 +160,37 @@ int main()
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
+
+		double curTime = glfwGetTime();
+		if (curTime - prevTime >= 1/60) {
+			rotation += 0.5f;
+			prevTime = curTime;
+		}
+
+		// model, view and projection transformation matrices
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 proj = glm::mat4(1.0f);
+
+		// rotates the actual vertices of the 3d object
+		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+		// puts the perspective onto the screen
+		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+		proj = glm::perspective(glm::radians(45.0f), (float)(width/height), 0.1f, 100.0f);
+
+		// import the uniforms from the vertex shader into the main function --
+		// use matrix4fv so that gl doesn't transpose the matrix
+		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+	
+
 		// Only after activating (one float)
 		glUniform1f(uniID, 0.5f);
 		texture.Bind();
@@ -142,7 +198,7 @@ int main()
 		VAO1.Bind();
 		// Draw primitives, number of indices, datatype of indices, index of indices
 		// glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
